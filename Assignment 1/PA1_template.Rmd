@@ -9,26 +9,38 @@ output:
 ## Loading and preprocessing the data
 
 
-```{r}
+```{r, echo=TRUE}
 ## Loading packages
 library(dplyr)
 library(ggplot2)
+library(data.table)
 
 ## Unpacking data
-setwd("C:/Users/ldewit/Documents/coursera_local/Reproducible_Research/RepData_PeerAssessment1")
 unzip('activity.zip', c("activity.csv"))
-data <- read.table("activity.csv", sep=",", header = TRUE)
+data <- read.csv("activity.csv")
+data<-data.table(data)
 
 ## Preparing data for analysis
-data$steps <- as.numeric(data$steps)
-data$date <- as.Date(data$date)
-
+data_grouped<-data[,mean(steps,na.rm=T),by=date]
 ```
 
 
 ## What is mean total number of steps taken per day?
 
+### Plotting Histrogram
 
+```{r, echo=TRUE}
+hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
+
+```
+
+### Calculation of mean and median
+```{r, echo=TRUE}
+mean<-mean(data_grouped$V1,na.rm=T)
+median<-median(data_grouped$V1,na.rm=T)
+```
+
+The mean is `r mean` and the median is `r median`.
 
 ## What is the average daily activity pattern?
 
