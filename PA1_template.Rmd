@@ -1,0 +1,41 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+
+
+```{r}
+## Loading packages
+library(dplyr)
+library(ggplot2)
+
+## Unpacking data
+setwd("C:/Users/ldewit/Documents/coursera_local/Reproducible_Research/RepData_PeerAssessment1")
+unzip('activity.zip', c("activity.csv"))
+data <- read.table("activity.csv", sep=",", header = TRUE)
+
+## Preparing data for analysis
+data$steps <- as.numeric(data$steps)
+data$date <- as.Date(data$date)
+
+```
+
+
+## What is mean total number of steps taken per day?
+
+
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
