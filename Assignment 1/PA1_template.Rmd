@@ -5,9 +5,7 @@ output:
     keep_md: true
 ---
 
-
 ## Loading and preprocessing the data
-
 
 ```{r, echo=TRUE}
 ## Loading packages
@@ -24,7 +22,7 @@ data<-data.table(data)
 
 ## What is mean total number of steps taken per day?
 
-### Plotting Histrogram
+### Plotting Histogram
 
 ```{r, echo=TRUE}
 data_grouped<-data[,mean(steps,na.rm=T),by=date]
@@ -33,6 +31,7 @@ hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
 ```
 
 ### Calculation of mean and median
+
 ```{r, echo=TRUE}
 mean<-mean(data_grouped$V1,na.rm=T)
 median<-median(data_grouped$V1,na.rm=T)
@@ -74,10 +73,14 @@ filled_data <- data.table(joined_data)
 
 Next, we'll create a histogram with the filled in dataset according to the method of the histogram made earlier:
 
+### Plotting Histogram
+
 ```{r, echo=TRUE}
 data_grouped<-filled_data[,mean(steps,na.rm=T),by=date]
 hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
 ```
+
+### Calculation of mean and median
 
 ```{r, echo=TRUE}
 mean_filled<-mean(data_grouped$V1,na.rm=T)
