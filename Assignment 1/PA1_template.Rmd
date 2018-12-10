@@ -19,9 +19,6 @@ library(data.table)
 unzip('activity.zip', c("activity.csv"))
 data <- read.csv("activity.csv")
 data<-data.table(data)
-
-## Preparing data for analysis
-data_grouped<-data[,mean(steps,na.rm=T),by=date]
 ```
 
 
@@ -30,6 +27,7 @@ data_grouped<-data[,mean(steps,na.rm=T),by=date]
 ### Plotting Histrogram
 
 ```{r, echo=TRUE}
+data_grouped<-data[,mean(steps,na.rm=T),by=date]
 hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
 
 ```
@@ -58,6 +56,42 @@ The interval containing the max number of averaged steps is `r max_steps`
 
 ## Imputing missing values
 
+```{r, echo=TRUE}
+na_count = sum(is.na(data))
+```
 
+There are `r na_count` missing values in the dataset.
+
+Missing values of steps will be replaced by the mean of the corresponding interval. A new dataset will be created that
+is equal to the original dataset but with missing values filled in.
+
+```{r, echo=TRUE}
+joined_data <- left_join(data, avg_data, by="interval")
+joined_data$steps[is.na(joined_data$steps)] <- joined_data$V1[is.na(joined_data$steps)]
+joined_data$V1 <- NULL
+filled_data <- data.table(joined_data)
+```
+
+Next, we'll create a histogram with the filled in dataset according to the method of the histogram made earlier:
+
+```{r, echo=TRUE}
+data_grouped<-filled_data[,mean(steps,na.rm=T),by=date]
+hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
+```
+
+```{r, echo=TRUE}
+mean_filled<-mean(data_grouped$V1,na.rm=T)
+median_filled<-median(data_grouped$V1,na.rm=T)
+```
+
+The mean is `r mean_filled` and the median is `r median_filled`.
+
+The historgram gives the same pattern for both datasets, althought the exact numbers diverge slightly.
+The means are the same (which makes sense as we used the means to fill the missing values). The medians also diverge
+slightly. Conclusively: the changes to the dataset by filling in the NA's can be considered negligble. However,
+as more observations are almost always favoured when applying machine learning techniques, fillign in the blanks
+is worth the trouble.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
