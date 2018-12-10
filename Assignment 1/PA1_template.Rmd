@@ -44,7 +44,17 @@ The mean is `r mean` and the median is `r median`.
 
 ## What is the average daily activity pattern?
 
+```{r, echo=TRUE}
+avg_data<-data[,mean(steps,na.rm=T),by=interval]
+plot(avg_data$interval,avg_data$V1,xlab="Interval",type="l", ylab="Average Steps",
+     main="Interval Plotted Against Average Number of Steps")
+```
 
+```{r, echo=TRUE}
+max_steps <- filter(avg_data, avg_data$V1==max(avg_data$V1))$interval
+```
+
+The interval containing the max number of averaged steps is `r max_steps`
 
 ## Imputing missing values
 
