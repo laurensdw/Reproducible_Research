@@ -12,6 +12,7 @@ output:
 library(dplyr)
 library(ggplot2)
 library(data.table)
+library(timeDate)
 
 ## Unpacking data
 unzip('activity.zip', c("activity.csv"))
@@ -89,12 +90,56 @@ median_filled<-median(data_grouped$V1,na.rm=T)
 
 The mean is `r mean_filled` and the median is `r median_filled`.
 
-The historgram gives the same pattern for both datasets, althought the exact numbers diverge slightly.
+The histogram shows the same pattern for both datasets, althought the exact numbers diverge slightly.
 The means are the same (which makes sense as we used the means to fill the missing values). The medians also diverge
 slightly. Conclusively: the changes to the dataset by filling in the NA's can be considered negligble. However,
-as more observations are almost always favoured when applying machine learning techniques, fillign in the blanks
+as more observations are almost always favoured when applying machine learning techniques, filling in the blanks
 is worth the trouble.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
+### Creating wDay column indicating difference between weekdays and weekends:
 
+```{r, echo=TRUE}
+# Creating temporary column that indicates days of the week.
+filled_data$weekday <- weekdays(as.Date(filled_data$date))
+# Creating character vector containing Dutch weekdays.
+weekdays1 <- c('maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag')
+# Using new column and vector create a second new column contaning weekday vs weekend info.
+filled_data$wDay <- factor((weekdays(filled_data$date) %in% weekdays1), 
+         levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+# Dropping temporary column.
+filled_data$weekday <- NULL
+```
+
+### Panel plot: interval vs steps for weekdays and weekends:
+
+```{r, echo=TRUE, fig.width=10, fig.height=10}
+## Subset weekdays and weekends in two different data sets
+weekday <- filter(filled_data, wDay=='weekday')
+weekend <- filter(filled_data, wDay=='weekend')
+
+## Convert to data table
+weekday <- data.table(weekday)
+weekend <- data.table(weekend)
+
+## Set parameters for figure
+par(mfrow=c(2,1))
+
+## Calculate averages and plot for weekdays
+avg_weekday<-weekday[,mean(steps,na.rm=T),by=interval]
+avg_weekday<-avg_weekday[order(avg_weekday$interval)]
+plot(as.numeric(avg_weekday$interval),avg_weekday$V1,xlab="Interval",type="l", 
+     ylab="Number of Steps",main="Weekday")
+
+## Calculate verages and plot for weekends
+avg_weekend<-weekend[,mean(steps,na.rm=T),by=interval]
+avg_weekend<-avg_weekend[order(avg_weekend$interval)]
+plot(as.numeric(avg_weekend$interval),avg_weekend$V1,xlab="Interval",type="l", 
+    ylab="Number of Steps",main="Weekend")
+```
+
+### Conclusion
+
+There is a difference in activity patterns between weekdays and weekends. There appears to be more activity in
+weekends. The activity in weekends is also more voltaile than during weekdays.
