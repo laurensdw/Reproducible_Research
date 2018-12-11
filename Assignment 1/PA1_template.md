@@ -7,7 +7,8 @@ output:
 
 ## Loading and preprocessing the data
 
-```{r, echo=TRUE, message=FALSE}
+
+```r
 ## Loading packages
 library(dplyr)
 library(ggplot2)
@@ -24,47 +25,56 @@ data<-data.table(data)
 
 ### Plotting Histogram
 
-```{r, echo=TRUE}
+
+```r
 data_grouped<-data[,mean(steps,na.rm=T),by=date]
 hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 ### Calculation of mean and median
 
-```{r, echo=TRUE}
+
+```r
 mean<-mean(data_grouped$V1,na.rm=T)
 median<-median(data_grouped$V1,na.rm=T)
 ```
 
-The mean is `r mean` and the median is `r median`.
+The mean is 37.3825996 and the median is 37.3784722.
 
 ## What is the average daily activity pattern?
 
-```{r, echo=TRUE}
+
+```r
 avg_data<-data[,mean(steps,na.rm=T),by=interval]
 plot(avg_data$interval,avg_data$V1,xlab="Interval",type="l", ylab="Average Steps",
      main="Interval Plotted Against Average Number of Steps")
 ```
 
-```{r, echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+
+```r
 max_steps <- filter(avg_data, avg_data$V1==max(avg_data$V1))$interval
 ```
 
-The interval containing the max number of averaged steps is `r max_steps`
+The interval containing the max number of averaged steps is 835
 
 ## Imputing missing values
 
-```{r, echo=TRUE}
+
+```r
 na_count = sum(is.na(data))
 ```
 
-There are `r na_count` missing values in the dataset.
+There are 2304 missing values in the dataset.
 
 Missing values of steps will be replaced by the mean of the corresponding interval. A new dataset will be created that
 is equal to the original dataset but with missing values filled in.
 
-```{r, echo=TRUE}
+
+```r
 joined_data <- left_join(data, avg_data, by="interval")
 joined_data$steps[is.na(joined_data$steps)] <- joined_data$V1[is.na(joined_data$steps)]
 joined_data$V1 <- NULL
@@ -75,19 +85,23 @@ Next, we'll create a histogram with the filled in dataset according to the metho
 
 ### Plotting Histogram
 
-```{r, echo=TRUE}
+
+```r
 data_grouped<-filled_data[,mean(steps,na.rm=T),by=date]
 hist(data_grouped$V1,col="red",xlab="",main="Histogram of Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 ### Calculation of mean and median
 
-```{r, echo=TRUE}
+
+```r
 mean_filled<-mean(data_grouped$V1,na.rm=T)
 median_filled<-median(data_grouped$V1,na.rm=T)
 ```
 
-The mean is `r mean_filled` and the median is `r median_filled`.
+The mean is 37.3825996 and the median is 37.3825996.
 
 The histogram shows the same pattern for both datasets, althought the exact numbers diverge slightly.
 The means are the same (which makes sense as we used the means to fill the missing values). The medians also diverge
@@ -99,7 +113,8 @@ is worth the trouble.
 
 ### Creating wDay column indicating difference between weekdays and weekends:
 
-```{r, echo=TRUE}
+
+```r
 library(timeDate)
 # Creating character vector containing Dutch weekdays.
 weekdays1 <- c('maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag')
@@ -110,7 +125,8 @@ filled_data$wDay <- factor((weekdays(as.Date(filled_data$date)) %in% weekdays1),
 
 ### Panel plot: interval vs steps for weekdays and weekends:
 
-```{r, echo=TRUE, fig.width=10, fig.height=10}
+
+```r
 ## Subset weekdays and weekends in two different data sets
 weekday <- filter(filled_data, wDay=='weekday')
 weekend <- filter(filled_data, wDay=='weekend')
@@ -134,6 +150,8 @@ avg_weekend<-avg_weekend[order(avg_weekend$interval)]
 plot(as.numeric(avg_weekend$interval),avg_weekend$V1,xlab="Interval",type="l", 
     ylab="Number of Steps",main="Weekend")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 ### Conclusion
 
