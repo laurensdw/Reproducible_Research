@@ -21,26 +21,37 @@ There is also some documentation of the database available. By clicking the foll
 The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years can be considered more complete.
 
 ### Loading packages
-
 ```{r, warning=FALSE}
 library(dplyr)
 ```
 
 ### Loading data
-
 ```{r}
 data <- read.csv("C:/Users/ldewit/Documents/coursera_local/Data/repdata-data-StormData.csv.bz2", header = TRUE)
 ```
 
 ### Harmful effects with respect to population health
-
 For this part, only features related to event type, population health, and economic consequences are relevant.
 
 ```{r}
 data_health <- select(data, "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP")
 ```
 
+Aggregate data per event
 
+```{r}
+fatalities <- aggregate(FATALITIES ~ EVTYPE, data_health, sum, na.rm=TRUE)
+fatalities <- fatalities[order(fatalities$FATALITIES, decreasing = TRUE),][1:10,]
 
+injuries <- aggregate(INJURIES ~ EVTYPE, data_health, sum, na.rm=TRUE)
+injuries <- injuries[order(injuries$INJURIES, decreasing = TRUE),][1:10,]
+```
 
+### Greatest economic consequence
 
+As can be found in the documentation, the characters in the columns PROPDMGEXP and CROPDMGEXP imply the magnitude of the numbers PROPDMG. Combining these columns gives an idea of the economic consequence.
+
+Property
+```{r}
+
+```
