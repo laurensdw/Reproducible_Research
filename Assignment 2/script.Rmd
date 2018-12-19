@@ -1,9 +1,9 @@
 ---
 title: 'Reproducible Research: Assignment 2'
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 # Analysis of the NOAA storm database to estimate fatalities, injuries, and property damage due to severe weather events.
 
@@ -24,24 +24,24 @@ There is also some documentation of the database available. By clicking the foll
 The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years can be considered more complete.
 
 ### Loading packages
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, cache=TRUE}
 library(dplyr)
 library(ggplot2)
 ```
 
 ### Loading data
-```{r}
+```{r, cache=TRUE}
 data <- read.csv("C:/Users/ldewit/Documents/coursera_local/Data/repdata-data-StormData.csv.bz2", header = TRUE)
 ```
 
 ### Harmful effects with respect to population health
 For this part, only features related to event type, population health, and economic consequences are relevant.
-```{r}
+```{r, cache=TRUE}
 data_health <- select(data, "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP")
 ```
 
 Aggregate data per event
-```{r}
+```{r, cache=TRUE}
 fatalities <- aggregate(FATALITIES ~ EVTYPE, data_health, sum, na.rm=TRUE)
 fatalities <- fatalities[order(fatalities$FATALITIES, decreasing = TRUE),][1:10,]
 
@@ -54,7 +54,7 @@ injuries <- injuries[order(injuries$INJURIES, decreasing = TRUE),][1:10,]
 As can be found in the documentation, the characters in the columns PROPDMGEXP and CROPDMGEXP imply the magnitude of the numbers PROPDMG. Combining these columns gives an idea of the economic consequence.
 
 Property
-```{r}
+```{r, cache=TRUE}
 data$pd <- 0
 data[data$PROPDMGEXP == "H", ]$pd <- 
         data[data$PROPDMGEXP == "H", ]$PROPDMG * 10^2
@@ -70,7 +70,7 @@ data[data$PROPDMGEXP == "B", ]$pd <-
 ```
 
 Crops
-```{r}
+```{r, cache=TRUE}
 data$crops <- 0
 data[data$CROPDMGEXP == "H", ]$crops <- 
         data[data$CROPDMGEXP == "H", ]$CROPDMG * 10^2
@@ -86,7 +86,7 @@ data[data$CROPDMGEXP == "B", ]$crops <-
 ```
 
 Next, we'll aggregate the sum of property and crop damages and then take the top 10 most damaging events again.
-```{r}
+```{r, cache=TRUE}
 data_damage <- aggregate(pd + crops ~ EVTYPE, data = data, sum)
 names(data_damage) <- c("EVTYPE", "ECON_DAM")
 data_damage <- data_damage[order(data_damage$ECON_DAM, decreasing = TRUE), ][1:10, ]
@@ -98,7 +98,7 @@ data_damage$EVTYPE <- factor(data_damage$EVTYPE, levels = data_damage$EVTYPE)
 To demonstrate the effects of weather events on health and economic factors we'll plot our aggregated data.
 
 ### Health
-```{r}
+```{r, cache=TRUE}
 ggplot(fatalities, aes(x=reorder(EVTYPE, -FATALITIES), y=FATALITIES)) +
         geom_bar(stat = "identity") +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
@@ -106,7 +106,7 @@ ggplot(fatalities, aes(x=reorder(EVTYPE, -FATALITIES), y=FATALITIES)) +
         ggtitle("Number of deaths by Top 10 Weather Events")
 ```
 
-```{r}
+```{r, cache=TRUE}
 ggplot(injuries, aes(x=reorder(EVTYPE, -INJURIES), y=INJURIES)) +
         geom_bar(stat = "identity") +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
@@ -115,7 +115,7 @@ ggplot(injuries, aes(x=reorder(EVTYPE, -INJURIES), y=INJURIES)) +
 ```
 
 ### Economic Damage
-```{r}
+```{r, cache=TRUE}
 ggplot(data_damage, aes(x=reorder(EVTYPE, -ECON_DAM), y=ECON_DAM)) +
         geom_bar(stat = "identity") +
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
