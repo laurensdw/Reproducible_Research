@@ -1,6 +1,9 @@
 ---
-title: "Reproducible Research: Assignment 2"
-output: html_notebook
+title: 'Reproducible Research: Assignment 2'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
 ---
 # Analysis of the NOAA storm database to estimate fatalities, injuries, and property damage due to severe weather events.
 
@@ -21,8 +24,9 @@ There is also some documentation of the database available. By clicking the foll
 The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years can be considered more complete.
 
 ### Loading packages
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 library(dplyr)
+library(ggplot2)
 ```
 
 ### Loading data
@@ -32,13 +36,11 @@ data <- read.csv("C:/Users/ldewit/Documents/coursera_local/Data/repdata-data-Sto
 
 ### Harmful effects with respect to population health
 For this part, only features related to event type, population health, and economic consequences are relevant.
-
 ```{r}
 data_health <- select(data, "EVTYPE", "FATALITIES", "INJURIES", "PROPDMG", "PROPDMGEXP", "CROPDMG", "CROPDMGEXP")
 ```
 
 Aggregate data per event
-
 ```{r}
 fatalities <- aggregate(FATALITIES ~ EVTYPE, data_health, sum, na.rm=TRUE)
 fatalities <- fatalities[order(fatalities$FATALITIES, decreasing = TRUE),][1:10,]
@@ -53,5 +55,73 @@ As can be found in the documentation, the characters in the columns PROPDMGEXP a
 
 Property
 ```{r}
+data$pd <- 0
+data[data$PROPDMGEXP == "H", ]$pd <- 
+        data[data$PROPDMGEXP == "H", ]$PROPDMG * 10^2
 
+data[data$PROPDMGEXP == "K", ]$pd <- 
+        data[data$PROPDMGEXP == "K", ]$PROPDMG * 10^3
+
+data[data$PROPDMGEXP == "M", ]$pd <- 
+        data[data$PROPDMGEXP == "M", ]$PROPDMG * 10^6
+
+data[data$PROPDMGEXP == "B", ]$pd <- 
+        data[data$PROPDMGEXP == "B", ]$PROPDMG * 10^9
 ```
+
+Crops
+```{r}
+data$crops <- 0
+data[data$CROPDMGEXP == "H", ]$crops <- 
+        data[data$CROPDMGEXP == "H", ]$CROPDMG * 10^2
+
+data[data$CROPDMGEXP == "K", ]$crops <- 
+        data[data$CROPDMGEXP == "K", ]$CROPDMG * 10^3
+
+data[data$CROPDMGEXP == "M", ]$crops <- 
+        data[data$CROPDMGEXP == "M", ]$CROPDMG * 10^6
+
+data[data$CROPDMGEXP == "B", ]$crops <- 
+        data[data$CROPDMGEXP == "B", ]$CROPDMG * 10^9
+```
+
+Next, we'll aggregate the sum of property and crop damages and then take the top 10 most damaging events again.
+```{r}
+data_damage <- aggregate(pd + crops ~ EVTYPE, data = data, sum)
+names(data_damage) <- c("EVTYPE", "ECON_DAM")
+data_damage <- data_damage[order(data_damage$ECON_DAM, decreasing = TRUE), ][1:10, ]
+data_damage$EVTYPE <- factor(data_damage$EVTYPE, levels = data_damage$EVTYPE)
+```
+
+## Results
+
+To demonstrate the effects of weather events on health and economic factors we'll plot our aggregated data.
+
+### Health
+```{r}
+ggplot(fatalities, aes(x=reorder(EVTYPE, -FATALITIES), y=FATALITIES)) +
+        geom_bar(stat = "identity") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+        xlab("Event Type") + ylab("Amount of Deaths") + 
+        ggtitle("Number of deaths by Top 10 Weather Events")
+```
+
+```{r}
+ggplot(injuries, aes(x=reorder(EVTYPE, -INJURIES), y=INJURIES)) +
+        geom_bar(stat = "identity") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+        xlab("Event Type") + ylab("Amount of Injuries") + 
+        ggtitle("Number of injuries by Top 10 Weather Events")
+```
+
+### Economic Damage
+```{r}
+ggplot(data_damage, aes(x=reorder(EVTYPE, -ECON_DAM), y=ECON_DAM)) +
+        geom_bar(stat = "identity") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+        xlab("Event Type") + ylab("Total Economic Damage") + 
+        ggtitle("Economic damage by Top 10 Weather Events")
+```
+
+## Conclusion
+Based on the figured above the conclusion can be drawn that tornadoes, by far, lead to the most deaths and injuries whereas floods cause most economic damage.
